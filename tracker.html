@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дашборд этапов проекта</title>
+    <style>
+        :root {
+            --primary: #245BF3;
+            --primary-light: #E7EEFF;
+            --bg: #F5F7FB;
+            --card-bg: #ffffff;
+            --border: #d9e2f2;
+            --text-main: #1f2933;
+            --text-muted: #6b7280;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+        }
+
+        .wrapper {
+            max-width: 720px;
+            margin: 32px auto;
+            padding: 0 16px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            padding: 24px 24px 20px;
+            border: 1px solid var(--border);
+        }
+
+        h1 {
+            margin: 0 0 4px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            margin-bottom: 18px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .progress-wrapper {
+            margin-bottom: 16px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .progress-label {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .progress-value {
+            color: var(--text-muted);
+        }
+
+        .progress-bar-bg {
+            position: relative;
+            width: 100%;
+            height: 12px;
+            background: var(--primary-light);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 999px;
+            transition: width 0.3s ease;
+        }
+
+        .steps-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 12px;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e3e7f3;
+        }
+
+        .step-item:last-child {
+            border-bottom: none;
+        }
+
+        .step-checkbox {
+            margin-right: 10px;
+            margin-top: 2px;
+        }
+
+        .step-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .step-label {
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .step-label span.step-title {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: #f0f4ff;
+            font-size: 11px;
+            color: var(--primary);
+            margin-right: 6px;
+        }
+
+        .step-label.completed {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .btn-reset {
+            border: 0;
+            background: transparent;
+            color: var(--primary);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 999px;
+        }
+        .btn-reset:hover {
+            background: var(--primary-light);
+        }
+
+        .storage-notice {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="card">
+        <h1>Этапы запуска проекта</h1>
+        <div class="subtitle">
+            Отмечайте выполненные шаги, чтобы отслеживать прогресс по проекту.
+        </div>
+
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <div class="progress-label">Прогресс проекта</div>
+                <div class="progress-value">
+                    <span id="completed-count">0</span> / <span id="total-count">0</span> этапов ·
+                    <span id="progress-percent">0%</span>
+                </div>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <ul class="steps-list" id="steps-list"></ul>
+
+        <div class="footer">
+            <div>
+                <div id="last-updated">Изменения не внесены</div>
+                <div class="storage-notice" id="storage-notice"></div>
+            </div>
+            <button class="btn-reset" id="reset-btn" type="button">
+                Сбросить все этапы
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const steps = [
+        "Клиент передан от отдела продаж",
+        "Заполнен бриф и материалы для сайта",
+        "Проведена установочная встреча",
+        "Установлена квартирография",
+        "Собрана главная страница и страница проекта",
+        "Проведена вторая встреча по согласованию дизайна",
+        "Внесены правки",
+        "Созданы дополнительные страницы сайта",
+        "Настроены все интеграции",
+        "Отсмотрена десктопная и мобильная версии сайта",
+        "Сайт поставлен на домен",
+        "Проведен онбординг",
+        "Запрошена оценка по запуску",
+        "Направлено кейс-интервью",
+        "Получена обратная связь через месяц"
+    ];
+
+    const STORAGE_KEY = "project-steps-dashboard-v1";
+    
+    const stepsListEl = document.getElementById("steps-list");
+    const completedCountEl = document.getElementById("completed-count");
+    const totalCountEl = document.getElementById("total-count");
+    const progressPercentEl = document.getElementById("progress-percent");
+    const progressBarEl = document.getElementById("progress-bar");
+    const lastUpdatedEl = document.getElementById("last-updated");
+    const storageNoticeEl = document.getElementById("storage-notice");
+    const resetBtn = document.getElementById("reset-btn");
+
+    let memoryStorage = {};
+    let storageAvailable = false;
+
+    function checkStorageAvailability() {
+        try {
+            const test = '__storage_test__';
+            localStorage.setItem(test, test);
+            localStorage.removeItem(test);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    storageAvailable = checkStorageAvailability();
+    
+    if (!storageAvailable) {
+        storageNoticeEl.textContent = "⚠️ Данные сохраняются только в текущей сессии";
+    }
+
+    function loadState() {
+        if (storageAvailable) {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                return saved ? JSON.parse(saved) : {};
+            } catch (e) {
+                console.warn("Ошибка чтения из localStorage", e);
+                return memoryStorage;
+            }
+        }
+        return memoryStorage;
+    }
+
+    function saveState(state) {
+        if (storageAvailable) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.warn("Ошибка записи в localStorage", e);
+                memoryStorage = state;
+            }
+        } else {
+            memoryStorage = state;
+        }
+    }
+
+    function updateProgress() {
+        const checkboxes = stepsListEl.querySelectorAll('input[type="checkbox"]');
+        const total = checkboxes.length;
+        let completed = 0;
+
+        checkboxes.forEach((cb) => {
+            const label = cb.closest(".step-item").querySelector(".step-label");
+            if (cb.checked) {
+                completed++;
+                label.classList.add("completed");
+            } else {
+                label.classList.remove("completed");
+            }
+        });
+
+        const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+        completedCountEl.textContent = completed.toString();
+        totalCountEl.textContent = total.toString();
+        progressPercentEl.textContent = percent + "%";
+        progressBarEl.style.width = percent + "%";
+        
+        const now = new Date();
+        lastUpdatedEl.textContent =
+            "Обновлено: " +
+            now.toLocaleDateString("ru-RU") +
+            " " +
+            now.toLocaleTimeString("ru-RU").slice(0, 5);
+    }
+
+    function init() {
+        const state = loadState();
+
+        steps.forEach((text, index) => {
+            const li = document.createElement("li");
+            li.className = "step-item";
+
+            const checkboxWrapper = document.createElement("div");
+            checkboxWrapper.className = "step-checkbox";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = "step-" + index;
+            if (state[index]) {
+                checkbox.checked = true;
+            }
+
+            checkbox.addEventListener("change", () => {
+                const currentState = loadState();
+                currentState[index] = checkbox.checked;
+                saveState(currentState);
+                updateProgress();
+            });
+
+            checkboxWrapper.appendChild(checkbox);
+
+            const label = document.createElement("label");
+            label.setAttribute("for", checkbox.id);
+            label.className = "step-label";
+
+            const badge = document.createElement("span");
+            badge.className = "step-title";
+            badge.textContent = (index + 1).toString().padStart(2, "0");
+
+            label.appendChild(badge);
+            label.appendChild(document.createTextNode(text));
+
+            li.appendChild(checkboxWrapper);
+            li.appendChild(label);
+
+            stepsListEl.appendChild(li);
+        });
+
+        updateProgress();
+    }
+
+    resetBtn.addEventListener("click", () => {
+        const checkboxes = stepsListEl.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach((cb) => (cb.checked = false));
+        saveState({});
+        updateProgress();
+    });
+
+    init();
+</script>
+</body>
+</html>
